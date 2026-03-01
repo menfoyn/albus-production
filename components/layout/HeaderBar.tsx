@@ -5,7 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 
-export default function HeaderBar() {
+type HeaderBarProps = {
+    active?: string;
+};
+
+export default function HeaderBar({ active: activeProp }: HeaderBarProps) {
     const [openMenu, setOpenMenu] = useState(false);
 
     // Figma: 1440 x 391
@@ -13,12 +17,13 @@ export default function HeaderBar() {
 
     const pathname = usePathname();
     const active = useMemo(() => {
+        if (activeProp) return activeProp;
         if (!pathname) return "";
         if (pathname.startsWith("/works")) return "works";
         if (pathname.startsWith("/services")) return "services";
         if (pathname.startsWith("/about")) return "about";
         return "";
-    }, [pathname]);
+    }, [pathname, activeProp]);
 
     return (
         <header className="relative w-full overflow-hidden">
