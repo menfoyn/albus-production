@@ -7,7 +7,7 @@ export default function WorksPage() {
     return (
         <main className="bg-white">
             {/* ÜST MOR BAR (Header) */}
-            <HeaderBar active="works" />
+            <HeaderBar />
 
             {/* KATEGORİ TABLARI */}
             <WorksTabs />
