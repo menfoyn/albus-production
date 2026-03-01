@@ -6,6 +6,7 @@ import {
   animate,
   motion,
   type PanInfo,
+  type MotionValue,
   useMotionValue,
   useTransform,
 } from "framer-motion";
@@ -43,7 +44,7 @@ export default function Services() {
   );
 
   const [active, setActive] = useState(0);
-  const shift = useMotionValue(0);
+  const shift = useMotionValue<number>(0);
 
   // Figma reference sizes
   const BASE_W = 454;
@@ -249,10 +250,11 @@ function ServiceCard({
   x2: number;
   xLeft: number;
   xRight: number;
-  shift: ReturnType<typeof useMotionValue>;
+  shift: MotionValue<number>;
   onDragEnd: (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void;
 }) {
   const isTop = rel === 0;
+  const shiftN = shift as MotionValue<number>;
 
   const xNow = rel === -1 ? xLeft : rel === 0 ? x0 : rel === 1 ? x1 : x2;
 
@@ -262,7 +264,7 @@ function ServiceCard({
   const xPrev =
       rel === -1 ? x0 : rel === 0 ? x1 : rel === 1 ? x2 : rel === 2 ? xRight : xRight;
 
-  const x = useTransform(shift, [-1, 0, 1], [xNext, xNow, xPrev]);
+  const x = useTransform<number, number>(shiftN, [-1, 0, 1], [xNext, xNow, xPrev]);
 
   const wNow = rel === 0 ? baseW : 328;
   const hNow = rel === 0 ? baseH : 404;
@@ -273,23 +275,23 @@ function ServiceCard({
   const wPrev = rel === -1 ? baseW : 328;
   const hPrev = rel === -1 ? baseH : 404;
 
-  const width = useTransform(shift, [-1, 0, 1], [wNext, wNow, wPrev]);
-  const height = useTransform(shift, [-1, 0, 1], [hNext, hNow, hPrev]);
+  const width = useTransform<number, number>(shiftN, [-1, 0, 1], [wNext, wNow, wPrev]);
+  const height = useTransform<number, number>(shiftN, [-1, 0, 1], [hNext, hNow, hPrev]);
 
   const SMALL_Y = baseH - 404;
   const yNow = rel === 0 ? 0 : SMALL_Y;
   const yNext = rel === 1 ? 0 : SMALL_Y;
   const yPrev = rel === -1 ? 0 : SMALL_Y;
-  const y = useTransform(shift, [-1, 0, 1], [yNext, yNow, yPrev]);
+  const y = useTransform<number, number>(shiftN, [-1, 0, 1], [yNext, yNow, yPrev]);
 
   const zIndex =
-      rel === 0
-          ? useTransform(shift, [-1, 0, 1], [50, 60, 50])
-          : rel === 1
-              ? useTransform(shift, [-1, 0, 1], [70, 40, 40])
-              : rel === -1
-                  ? useTransform(shift, [-1, 0, 1], [40, 40, 70])
-                  : 30;
+    rel === 0
+      ? useTransform<number, number>(shiftN, [-1, 0, 1], [50, 60, 50])
+      : rel === 1
+        ? useTransform<number, number>(shiftN, [-1, 0, 1], [70, 40, 40])
+        : rel === -1
+          ? useTransform<number, number>(shiftN, [-1, 0, 1], [40, 40, 70])
+          : useTransform<number, number>(shiftN, [-1, 0, 1], [30, 30, 30]);
 
   return (
       <motion.div
@@ -297,11 +299,11 @@ function ServiceCard({
               isTop ? "pointer-events-auto" : "pointer-events-none"
           }`}
           style={{
-            width,
-            height,
-            x,
-            y,
-            zIndex,
+            width: width as unknown as MotionValue<string | number>,
+            height: height as unknown as MotionValue<string | number>,
+            x: x as unknown as MotionValue<string | number>,
+            y: y as unknown as MotionValue<string | number>,
+            zIndex: zIndex as unknown as MotionValue<string | number>,
             transformOrigin: "top left",
             cursor: isTop ? "grab" : "default",
           }}
