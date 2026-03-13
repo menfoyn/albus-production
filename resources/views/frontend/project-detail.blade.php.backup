@@ -1,0 +1,584 @@
+@extends('layouts.app')
+
+@section('title', $project->title . ' — Albus Production')
+
+@push('styles')
+<style>
+/* ═══════════════════════════════════════════════
+   PROJECT DETAIL — Figma Match
+   ═══════════════════════════════════════════════ */
+
+/* ── HERO ──────────────────────────────────────── */
+.pd-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 640px;
+    overflow: hidden;
+}
+.pd-hero__bg {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.pd-hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,.55) 100%);
+}
+
+/* Hero bottom bar */
+.pd-hero__bar {
+    position: absolute;
+    bottom: 0;
+    left: 0; right: 0;
+    height: 181px;
+    background: linear-gradient(to right, #120522, #272525);
+    padding: 0 101px;
+    display: flex;
+    align-items: center;
+    z-index: 5;
+}
+.pd-hero__watch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    letter-spacing: .3px;
+}
+.pd-hero__watch svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+}
+.pd-hero__watch:hover { opacity: .8; }
+
+
+
+/* ── VIDEO MODAL ─────────────────────────────── */
+.vm-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,.94);
+    align-items: center;
+    justify-content: center;
+}
+.vm-overlay.is-open { display: flex; }
+.vm-close {
+    position: absolute;
+    top: 28px; right: 36px;
+    width: 48px; height: 48px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .25s;
+}
+.vm-close:hover { background: rgba(255,255,255,.18); }
+.vm-wrap {
+    width: 88%;
+    max-width: 1100px;
+    aspect-ratio: 16/9;
+}
+.vm-wrap video {
+    width: 100%; height: 100%;
+    border-radius: 8px;
+    outline: none;
+}
+
+/* ── INTRO SECTION ───────────────────────────── */
+.pd-intro {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 90px 80px 60px;
+    display: grid;
+    grid-template-columns: 38% 1fr;
+    gap: 48px;
+    align-items: start;
+}
+.pd-intro__left { display: flex; flex-direction: column; }
+
+.pd-intro__title {
+    font-family: 'Rubik', sans-serif;
+    font-size: 48px;
+    font-weight: 500;
+    color: var(--red, #E8001C);
+    line-height: 1.15;
+    margin-bottom: 24px;
+}
+.pd-intro__desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.85;
+    color: #555;
+    margin-bottom: 32px;
+    max-width: 420px;
+}
+.pd-intro__video-wrap {
+    position: relative;
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #000;
+    aspect-ratio: 9/16;
+    max-height: 600px;
+}
+.pd-intro__video-wrap video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.pd-intro__date {
+    position: absolute;
+    bottom: 12px; right: 12px;
+    background: rgba(0,0,0,.55);
+    color: #fff;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: 500;
+    letter-spacing: .5px;
+}
+
+.pd-intro__right {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.pd-intro__image {
+    width: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.pd-intro__image img {
+    width: 100%;
+    display: block;
+    border-radius: 10px;
+}
+.pd-intro__quote {
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    line-height: 1.75;
+    color: #555;
+    max-width: 460px;
+}
+
+/* ── GALLERY ─────────────────────────────────── */
+.pd-gallery {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 20px 80px 80px;
+}
+.pd-gallery__header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+.pd-gallery__label {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--red, #E8001C);
+    letter-spacing: .5px;
+}
+.pd-gallery__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+.pd-gallery__item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    aspect-ratio: 1;
+    background: #111;
+}
+.pd-gallery__item img,
+.pd-gallery__item video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .4s ease;
+}
+.pd-gallery__item:hover img,
+.pd-gallery__item:hover video {
+    transform: scale(1.06);
+}
+.pd-gallery__item--video::after {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px; height: 44px;
+    background: rgba(0,0,0,.5) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E") center/20px no-repeat;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* ── LIGHTBOX ────────────────────────────────── */
+.lb-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: rgba(0,0,0,.96);
+    align-items: center;
+    justify-content: center;
+}
+.lb-overlay.is-open { display: flex; }
+.lb-close {
+    position: absolute;
+    top: 24px; right: 28px;
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 50%;
+    color: #fff; font-size: 22px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10; transition: .25s;
+}
+.lb-close:hover { background: rgba(255,255,255,.18); }
+.lb-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px; height: 50px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 50%;
+    color: #fff; font-size: 26px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: .25s; z-index: 10;
+}
+.lb-nav:hover { background: rgba(255,255,255,.15); }
+.lb-nav--prev { left: 28px; }
+.lb-nav--next { right: 28px; }
+.lb-content {
+    max-width: 90vw;
+    max-height: 85vh;
+    position: relative;
+}
+.lb-content img {
+    max-width: 90vw; max-height: 85vh;
+    object-fit: contain; border-radius: 6px;
+}
+.lb-content video {
+    max-width: 90vw; max-height: 85vh;
+    border-radius: 6px; outline: none;
+}
+.lb-counter {
+    position: absolute;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,.5);
+    font-size: 13px; z-index: 10;
+}
+
+/* ── RELATED WORKS ───────────────────────────── */
+.pd-related {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 60px 80px 100px;
+}
+.pd-related__header {
+    margin-bottom: 48px;
+}
+.pd-related__title {
+    font-family: 'Rubik', sans-serif;
+    font-size: 38px;
+    font-weight: 500;
+    color: var(--red, #E8001C);
+    line-height: 1.25;
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+}
+.pd-related__title svg {
+    width: 28px; height: 28px;
+    fill: none; stroke: var(--red, #E8001C);
+    stroke-width: 2.5;
+    flex-shrink: 0;
+    margin-bottom: 6px;
+}
+.pd-related__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+.pd-related__card {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    display: block;
+    background: #111;
+}
+.pd-related__card:nth-child(1) { aspect-ratio: 3/4; }
+.pd-related__card:nth-child(2) { aspect-ratio: 4/3; }
+.pd-related__card:nth-child(3) { aspect-ratio: 3/4; }
+
+.pd-related__card img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .5s ease;
+}
+.pd-related__card:hover img { transform: scale(1.05); }
+.pd-related__card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 120px;
+    background: linear-gradient(to top, rgba(0,0,0,.55) 0%, transparent 100%);
+    pointer-events: none;
+}
+.pd-related__label {
+    position: absolute;
+    bottom: 24px; left: 24px;
+    font-family: 'Rubik', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    z-index: 2;
+}
+
+/* ── RESPONSIVE ──────────────────────────────── */
+@media (max-width: 1024px) {
+    .pd-hero__bar { height: 100px; padding: 0 30px; }
+    .pd-intro { grid-template-columns: 1fr; padding: 60px 30px; gap: 36px; }
+    .pd-intro__video-wrap { max-height: 480px; aspect-ratio: auto; }
+    .pd-gallery { padding: 20px 30px 60px; }
+    .pd-gallery__grid { grid-template-columns: repeat(3, 1fr); }
+    .pd-related { padding: 40px 30px 70px; }
+    .pd-related__grid { grid-template-columns: repeat(2, 1fr); }
+    .pd-related__card:nth-child(1),
+    .pd-related__card:nth-child(2),
+    .pd-related__card:nth-child(3) { aspect-ratio: 4/3; }
+}
+@media (max-width: 640px) {
+    .pd-hero__bar { height: 80px; padding: 0 20px; }
+    .pd-intro__title { font-size: 32px; }
+    .pd-gallery__grid { grid-template-columns: repeat(2, 1fr); }
+    .pd-related__grid { grid-template-columns: 1fr; }
+    .pd-related__title { font-size: 28px; }
+}
+</style>
+@endpush
+
+@section('content')
+
+{{-- ═══════════════ HERO ═══════════════ --}}
+<section class="pd-hero">
+    <div class="pd-hero__bg" style="background-image:url('{{ $project->cover_image ? asset('storage/'.$project->cover_image) : '' }}');{{ $project->hero_image_position ? 'background-position:'.$project->hero_image_position.';' : '' }}"></div>
+    <div class="pd-hero__overlay"></div>
+
+    <div class="pd-hero__bar">
+        @if($project->hero_video)
+        <button class="pd-hero__watch" onclick="openVideoModal()">
+            Tanıtımı İzle
+            <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+        </button>
+        @else
+        <span></span>
+        @endif
+
+
+    </div>
+</section>
+
+{{-- ═══════════════ VIDEO MODAL ═══════════════ --}}
+@if($project->hero_video)
+<div class="vm-overlay" id="videoModal">
+    <button class="vm-close" onclick="closeVideoModal()">✕</button>
+    <div class="vm-wrap">
+        <video id="heroVideo" controls>
+            <source src="{{ asset('storage/'.$project->hero_video) }}" type="video/mp4">
+        </video>
+    </div>
+</div>
+@endif
+
+{{-- ═══════════════ INTRO ═══════════════ --}}
+<section class="pd-intro">
+    <div class="pd-intro__left">
+        <h1 class="pd-intro__title">{{ $project->title }}</h1>
+
+        @if($project->description)
+        <div class="pd-intro__desc">{!! nl2br(e($project->description)) !!}</div>
+        @endif
+
+        @if($project->intro_video)
+        <div class="pd-intro__video-wrap">
+            <video autoplay muted loop playsinline>
+                <source src="{{ asset('storage/'.$project->intro_video) }}" type="video/mp4">
+            </video>
+            @if($project->date)
+            <span class="pd-intro__date">{{ $project->date }}</span>
+            @endif
+        </div>
+        @endif
+    </div>
+
+    <div class="pd-intro__right">
+        @if($project->intro_image)
+        <div class="pd-intro__image">
+            <img src="{{ asset('storage/'.$project->intro_image) }}" alt="{{ $project->title }}">
+        </div>
+        @endif
+
+        @if($project->quote_text)
+        <div class="pd-intro__quote">{{ $project->quote_text }}</div>
+        @endif
+    </div>
+</section>
+
+{{-- ═══════════════ GALLERY ═══════════════ --}}
+@php $galleryMedia = $project->media; @endphp
+
+@if($galleryMedia->count())
+<section class="pd-gallery">
+    <div class="pd-gallery__header">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--red,#E8001C)" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span class="pd-gallery__label">Galeri</span>
+    </div>
+    <div class="pd-gallery__grid">
+        @foreach($galleryMedia as $i => $item)
+        <div class="pd-gallery__item {{ $item->type === 'video' ? 'pd-gallery__item--video' : '' }}" onclick="openLightbox({{ $i }})">
+            @if($item->type === 'video')
+                @if($item->thumbnail)
+                    <img src="{{ asset('storage/'.$item->thumbnail) }}" alt="">
+                @else
+                    <video muted preload="metadata"><source src="{{ asset('storage/'.$item->file_path) }}" type="video/mp4"></video>
+                @endif
+            @else
+                <img src="{{ asset('storage/'.$item->file_path) }}" alt="">
+            @endif
+        </div>
+        @endforeach
+    </div>
+</section>
+
+{{-- Lightbox --}}
+<div class="lb-overlay" id="lightbox">
+    <button class="lb-close" onclick="closeLightbox()">✕</button>
+    <button class="lb-nav lb-nav--prev" onclick="prevSlide()">‹</button>
+    <button class="lb-nav lb-nav--next" onclick="nextSlide()">›</button>
+    <div class="lb-content" id="lbContent"></div>
+    <div class="lb-counter" id="lbCounter"></div>
+</div>
+@endif
+
+{{-- ═══════════════ RELATED WORKS ═══════════════ --}}
+@if($related->count())
+<section class="pd-related">
+    <div class="pd-related__header">
+        <h2 class="pd-related__title">
+            Diğer<br>İşlerimize<br>Göz Atın
+            <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+        </h2>
+    </div>
+    <div class="pd-related__grid">
+        @foreach($related as $rel)
+        <a href="{{ route('portfolio.show', $rel->slug) }}" class="pd-related__card">
+            <img src="{{ $rel->cover_image ? asset('storage/'.$rel->cover_image) : '' }}" alt="{{ $rel->title }}">
+            <span class="pd-related__label">{{ mb_strtoupper($rel->title) }}</span>
+        </a>
+        @endforeach
+    </div>
+</section>
+@endif
+
+@endsection
+
+@push('scripts')
+<script>
+/* ── Video Modal ─────────────────── */
+function openVideoModal(){
+    var m=document.getElementById('videoModal');
+    if(!m)return;
+    m.classList.add('is-open');
+    document.body.style.overflow='hidden';
+    document.getElementById('heroVideo').play();
+}
+function closeVideoModal(){
+    var m=document.getElementById('videoModal');
+    if(!m)return;
+    m.classList.remove('is-open');
+    document.body.style.overflow='';
+    var v=document.getElementById('heroVideo');
+    v.pause(); v.currentTime=0;
+}
+
+/* ── Lightbox ────────────────────── */
+var galleryItems={!! json_encode(
+    isset($galleryMedia) && $galleryMedia->count() ? $galleryMedia->map(function($m){
+        return ['type'=>$m->type,'src'=>asset('storage/'.$m->file_path)];
+    })->values() : []
+) !!};
+var currentSlide=0;
+
+function openLightbox(i){
+    currentSlide=i;
+    renderSlide();
+    document.getElementById('lightbox').classList.add('is-open');
+    document.body.style.overflow='hidden';
+}
+function closeLightbox(){
+    document.getElementById('lightbox').classList.remove('is-open');
+    document.body.style.overflow='';
+    document.querySelectorAll('#lbContent video').forEach(function(v){v.pause();});
+}
+function renderSlide(){
+    var item=galleryItems[currentSlide];
+    var box=document.getElementById('lbContent');
+    if(item.type==='video'){
+        box.innerHTML='<video controls autoplay style="max-width:90vw;max-height:85vh;border-radius:6px"><source src="'+item.src+'" type="video/mp4"></video>';
+    }else{
+        box.innerHTML='<img src="'+item.src+'" style="max-width:90vw;max-height:85vh;object-fit:contain;border-radius:6px">';
+    }
+    document.getElementById('lbCounter').textContent=(currentSlide+1)+' / '+galleryItems.length;
+}
+function nextSlide(){
+    currentSlide=(currentSlide+1)%galleryItems.length;
+    renderSlide();
+}
+function prevSlide(){
+    currentSlide=(currentSlide-1+galleryItems.length)%galleryItems.length;
+    renderSlide();
+}
+document.addEventListener('keydown',function(e){
+    var lb=document.getElementById('lightbox');
+    if(lb&&lb.classList.contains('is-open')){
+        if(e.key==='Escape')closeLightbox();
+        if(e.key==='ArrowRight')nextSlide();
+        if(e.key==='ArrowLeft')prevSlide();
+    }
+    var vm=document.getElementById('videoModal');
+    if(vm&&vm.classList.contains('is-open')&&e.key==='Escape')closeVideoModal();
+});
+</script>
+@endpush
